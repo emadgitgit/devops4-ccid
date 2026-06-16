@@ -1,0 +1,21 @@
+name: CD Pipeline
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy-to-render:
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Trigger Render Deployment
+        run: |
+          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+
+      - name: Confirm Deployment
+        run: echo "Deployment hook triggered successfully at $(date)"

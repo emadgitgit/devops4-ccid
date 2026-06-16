@@ -1,0 +1,30 @@
+name: CI Pipeline
+
+on:
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build Docker Image
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/devops4-ccid:latest .
+
+      - name: Tag Image with SHA
+        run: docker tag ${{ secrets.DOCKERHUB_USERNAME }}/devops4-ccid:latest ${{ secrets.DOCKERHUB_USERNAME }}/devops4-ccid:${{ github.sha }}
+
+      - name: Push Image to Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/devops4-ccid:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/devops4-ccid:${{ github.sha }}
